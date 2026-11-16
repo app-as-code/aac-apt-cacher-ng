@@ -1,0 +1,67 @@
+services:
+  # --- Main Application Service ---
+  aac-apt-cacher-ng:
+    image: "sameersbn/apt-cacher-ng:3.7.4-20220421"
+    container_name: "aac-apt-cacher-ng"
+    hostname: "apt-cacher-ng"
+    restart: "always"
+
+
+    environment:
+      TZ: "Europe/Berlin"
+      PUID: "1000"
+      SERVICE_DOMAIN_NAME: "example.com"
+      SERVICE_NAME: "aac-apt-cacher-ng"
+      PGID: "1000"
+      SERVICE_HOSTNAME: "apt-cacher-ng"
+      SERVICE_IMAGE_NAME: "sameersbn/apt-cacher-ng"
+      SERVICE_IMAGE_TAG: "3.7.4-20220421"
+
+    ports:
+      - "3142:3142/tcp"
+
+    volumes:
+      - "/export/docker/aac-apt-cacher-ng/cache:/var/cache/apt-cacher-ng"
+
+    networks:
+      - exposed
+      - interconnect
+      - secured
+      - stack_internal
+
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.aac-apt-cacher-ng.rule: "Host(`apt-cacher-ng.example.com`)"
+      traefik.http.routers.aac-apt-cacher-ng.entrypoints: "websecure"
+      traefik.http.routers.aac-apt-cacher-ng.tls: "true"
+      traefik.http.routers.aac-apt-cacher-ng.tls.certresolver: "ionos"
+      traefik.docker.network: "services-secured"
+      traefik.http.services.aac-apt-cacher-ng.loadbalancer.server.port: "3142"
+      traefik.http.services.aac-apt-cacher-ng.loadbalancer.server.scheme: "http"
+      auto-dns.createWildcard.aac-apt-cacher-ng: "false"
+      auto-dns.customDNS.aac-apt-cacher-ng: "true"
+      auto-dns.customDOMAIN.aac-apt-cacher-ng: "example.com"
+      auto-dns.customHost.aac-apt-cacher-ng: "apt-cacher-ng"
+      homepage.group: "Backend - Services"
+      homepage.name: "Apt Cacher Ng"
+      homepage.href: "https://apt-cacher-ng.example.com"
+      homepage.icon: "/icons/icons8-gunter-100.png"
+      homepage.description: "APT Caching Proxy"
+
+
+
+
+networks:
+  secured:
+    name: "services-secured"
+    external: true
+  exposed:
+    name: "services-exposed"
+    external: true
+  interconnect:
+    name: "docker-default"
+    external: true
+  stack_internal:
+    name: "aac-apt-cacher-ng_stack_internal"
+    driver: "bridge"
+

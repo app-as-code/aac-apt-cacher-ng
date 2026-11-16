@@ -1,0 +1,74 @@
+service:
+  name: aac-apt-cacher-ng
+  image_repo: sameersbn/apt-cacher-ng
+  image_tag: 3.7.4-20220421
+  description: APT Caching Proxy
+  icon: /icons/icons8-gunter-100.png
+  category: Backend - Services
+  stage: prod
+  hostname: apt-cacher-ng
+ports:
+- name: web
+  port: 3142
+  external_port: 3142
+  protocol: TCP
+config:
+  domain_name: example.com
+  generate_hostname: false
+  integrations:
+    homepage:
+      enabled: true
+    autodns:
+      enabled: true
+    traefik:
+      enabled: true
+      cert_resolver: ionos
+      entrypoint: websecure
+  schema_version: 2
+volumes:
+  cache:
+    description: APT package cache
+deployment_strategy:
+  main:
+    enabled: true
+    target_stage: prod
+  dev:
+    enabled: true
+    target_stage: dev
+  test:
+    enabled: false
+    target_stage: test
+  ansible-dev:
+    enabled: true
+    target_stage: dev
+  iac-dev:
+    enabled: true
+    target_stage: dev
+  template-dev:
+    enabled: true
+    target_stage: dev
+deployments:
+  docker_compose:
+    restart_policy: always
+    host_base_path: /export/docker
+    volumes:
+    - cache:/var/cache/apt-cacher-ng
+    environment:
+      TZ: '{{ vars.TZ }}'
+      PUID: '{{ vars.PUID }}'
+      SERVICE_DOMAIN_NAME: '{{ vars.SERVICE_DOMAIN_NAME }}'
+      SERVICE_NAME: '{{ vars.SERVICE_NAME }}'
+      PGID: '{{ vars.PGID }}'
+      SERVICE_HOSTNAME: '{{ vars.SERVICE_HOSTNAME }}'
+      SERVICE_IMAGE_NAME: '{{ vars.SERVICE_IMAGE_NAME }}'
+      SERVICE_IMAGE_TAG: '{{ vars.SERVICE_IMAGE_TAG }}'
+vars:
+  TZ: Europe/Berlin
+  PUID: '1000'
+  SERVICE_DOMAIN_NAME: example.com
+  SERVICE_NAME: aac-apt-cacher-ng
+  PGID: '1000'
+  SERVICE_HOSTNAME: apt-cacher-ng
+  SERVICE_IMAGE_NAME: sameersbn/apt-cacher-ng
+  SERVICE_IMAGE_TAG: 3.7.4-20220421
+secrets: {}
